@@ -4,7 +4,7 @@
 ![License](https://img.shields.io/badge/license-CC_BY--NC_4.0-lightgrey)
 ![Status](https://img.shields.io/badge/status-in%20progress-yellow)
 
-AI Agent for Markdown deduplication and cleanup built using LangChain and OpenAI. Designed to process large Markdown files with hierarchical structure, remove redundancy, merge overlapping sections intelligently, and maintain document coherence. Supports both LLM-powered and basic (no-API) modes.
+AI Agent for Markdown deduplication and cleanup built using LangChain and OpenAI. Designed to process large Markdown files with hierarchical structure, remove redundancy, merge overlapping sections intelligently, and maintain document coherence.
 
 ---
 
@@ -14,23 +14,20 @@ AI Agent for Markdown deduplication and cleanup built using LangChain and OpenAI
 - [Requirements](#requirements)
 - [Dependencies](#dependencies)
 - [Installation and Setup](#installation-and-setup)
-- [Usage](#usage)
-- [Modes of Operation](#modes-of-operation)
 - [Architecture](#architecture)
 - [Configuration](#configuration)
-- [Design Decisions](#design-decisions)
 - [Next Steps](#next-steps)
 - [License](#license)
 
 ## Features
 
-- ✅ **Hierarchical Section Parsing** – Preserves document structure (H1, H2, H3, etc.)
-- ✅ **4-Pass Intelligent Pipeline** – Exact dedup → Semantic dedup → Smart merging → Global consistency
-- ✅ **Subsection Support** – Maintains parent-child relationships when merging sections
-- ✅ **TF-IDF Similarity Detection** – Only merges sections that are actually similar
-- ✅ **Dual Mode** – Works with or without OpenAI API
-- ✅ **Smart Comparison** – Only compares sections at same hierarchical level with same parent
-- ✅ **Fuzzy Duplicate Detection** – Catches semantic duplicates, not just exact matches
+- ✅ Preserves document structure/Hierarchy (H1, H2, H3, etc.)
+- ✅ 4-Pass Pipeline: Exact dedup → Semantic dedup → Smart merging → Global consistency
+- ✅ Maintains parent-child relationships when merging sections
+- ✅ TF-IDF Similarity Detection: Only merges sections that are actually similar
+- ✅ Works with or without OpenAI API
+- ✅ Only compares sections at same hierarchical level with same parent
+- ✅ Catches semantic duplicates, not just exact matches
 
 ## Requirements
 
@@ -50,117 +47,41 @@ numpy>=1.21.0
 
 ## Installation and Setup
 
-### 1. Clone Repository
+1. Clone Repository
 
 ```bash
 git clone https://github.com/<your-username>/md_dedup.git
 cd md_dedup
 ```
 
-### 2. Create Python Virtual Environment
+2. Python Virtual Environment
 
 ```bash
 python -m venv venv
-```
-
-### 3. Activate Virtual Environment
-
-**PowerShell:**
-
-```powershell
-.\venv\Scripts\Activate.ps1
-```
-
-**Git Bash / MINGW64 / Linux / macOS:**
-
-```bash
 source venv/Scripts/activate  # Windows Git Bash
 source venv/bin/activate      # Linux/macOS
 ```
 
-### 4. Install Dependencies
+3.  Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 5. Set OpenAI API Key (Optional - for LLM mode)
-
-**PowerShell:**
-
-```powershell
-$env:OPENAI_API_KEY="your_api_key_here"
-```
-
-**Git Bash / MINGW64:**
+5.  Set OpenAI API Key (Optional - for LLM mode)
 
 ```bash
-export OPENAI_API_KEY="your_api_key_here"
+$env:OPENAI_API_KEY="your_api_key_here" # powershell
+export OPENAI_API_KEY="your_api_key_here" # bash
 ```
 
-**For persistence**, add to `~/.bashrc` (Linux/Mac) or `~/.bash_profile` (Git Bash):
-
-```bash
-export OPENAI_API_KEY="your_api_key_here"
-source ~/.bashrc  # reload
-```
-
-## Usage
-
-### Basic Command
+6.  Run
 
 ```bash
 python -m md_dedup.cli --input <input_file.md> --output <output_file.md>
 ```
 
-### Examples
-
-```bash
-# Process a documentation file
-python -m md_dedup.cli --input docs.md --output docs-cleaned.md
-
-# Process with subsections
-python -m md_dedup.cli --input api-docs.md --output api-docs-clean.md
-```
-
-## Modes of Operation
-
-### LLM Mode
-
-**Requires:** OpenAI API key and credits
-
-**Features:**
-
-- AI-powered semantic deduplication
-- Intelligent section merging with context awareness
-- Natural language understanding of content
-
-**Enable in `config.py`:**
-
-```python
-USE_LLM = True
-```
-
-### Basic Mode (No API Required)
-
-**Requires:** No API key, works offline
-
-**Features:**
-
-- Exact duplicate removal
-- Fuzzy matching for similar content (difflib)
-- TF-IDF based similarity detection
-- Basic section merging
-
-**Enable in `config.py`:**
-
-```python
-USE_LLM = False
-```
-
-## Architecture
-
-### Pipeline Overview
+## Architecture/Pipeline
 
 ```mermaid
 flowchart TD
@@ -180,14 +101,12 @@ flowchart TD
     K --> L
     L --> M[Save Cleaned Markdown]
 
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:1px
-    style E fill:#fbf,stroke:#333,stroke-width:2px
-    style J fill:#fbf,stroke:#333,stroke-width:2px
-    style M fill:#f9f,stroke:#333,stroke-width:2px
+    style A fill:#f9f,stroke:#000,stroke-width:2px
+    style B fill:#bbf,stroke:#000,stroke-width:1px
+    style E fill:#99f,stroke:#000,stroke-width:2px
+    style J fill:#99f,stroke:#000,stroke-width:2px
+    style M fill:#f9f,stroke:#000,stroke-width:2px
 ```
-
-### 4-Pass Processing
 
 1. **Pass 1: Exact Deduplication**
    - Removes identical duplicate lines within each section
@@ -213,10 +132,10 @@ flowchart TD
 Edit `md_dedup/config.py` to customize behavior:
 
 ```python
-# Enable/disable LLM features
-USE_LLM = False  # Set to True for AI-powered mode
+# Enable/disable OpenAI usage
+USE_LLM = False
 
-# OpenAI model settings
+# OpenAI model settings (only used when USE_LLM = True)
 MODEL_NAME = "gpt-3.5-turbo"
 TEMPERATURE = 0  # 0 = deterministic, higher = more creative
 
@@ -225,46 +144,8 @@ SIMILARITY_THRESHOLD = 0.7        # 0.0-1.0, lower = merge more sections
 SEMANTIC_DEDUP_THRESHOLD = 0.85   # 0.0-1.0, lower = remove more duplicates
 ```
 
-## Design Decisions
-
-### Why Hierarchical Structure?
-
-- Preserves document organization
-- Prevents inappropriate merging of unrelated sections
-- Maintains parent-child relationships in subsections
-
-### Why Dual Mode?
-
-- **LLM Mode:** Best quality, context-aware processing
-- **Basic Mode:** No API costs, works offline, still effective
-
-### Why TF-IDF for Similarity?
-
-- Industry-standard text similarity metric
-- Fast and efficient
-- Works without external APIs
-- Good balance of accuracy vs. performance
-
-### Why 4 Passes?
-
-- **Incremental refinement** – Each pass handles different types of redundancy
-- **Fail-safe design** – If one pass fails, others still work
-- **Modular** – Easy to add/remove/modify individual passes
-
-## Project Structure
-
-```
-md_dedup/
-├── __init__.py          # Package marker
-├── cli.py               # Command-line interface
-├── config.py            # Configuration settings
-├── loader.py            # Markdown parsing with hierarchy
-├── passes.py            # Deduplication and similarity logic
-├── runner.py            # Pipeline orchestration
-└── utils.py             # Helper functions
-requirements.txt         # Python dependencies
-README.md               # This file
-```
+- When `USE_LLM = False`: Basic mode with exact duplicate removal, fuzzy matching, and TF-IDF similarity detection (no API required, works offline)
+- When `USE_LLM = True`: AI-powered semantic deduplication and intelligent section merging (requires OpenAI API key and credits)
 
 ## Next Steps
 
@@ -276,31 +157,6 @@ README.md               # This file
 - [ ] **Diff output** – Show what was changed/merged
 - [ ] **Local LLM support** – Ollama, LLaMA integration
 - [ ] **Configurable merging strategies** – Aggressive, conservative, balanced
-
-## Troubleshooting
-
-### "ModuleNotFoundError: No module named 'langchain_openai'"
-
-```bash
-pip install langchain-openai
-```
-
-### "OpenAI API quota exceeded"
-
-- Set `USE_LLM = False` in `config.py` to use basic mode
-- Or add credits at https://platform.openai.com/account/billing
-
-### "No sections found to merge"
-
-- Lower `SIMILARITY_THRESHOLD` in `config.py` (e.g., 0.5)
-- Check if your sections actually have similar content
-
-### Import errors
-
-```bash
-# Reinstall dependencies
-pip install --upgrade -r requirements.txt
-```
 
 ## Contributing
 
@@ -324,6 +180,5 @@ For full license text, see [LICENSE](./LICENSE)
 
 ---
 
-**Author:** Talha Yousuf  
-**Repository:** https://github.com/talha-yousuf/md_dedup  
-**Issues:** https://github.com/talha-yousuf/md_dedup/issues
+**Author:** Talha Yousuf
+**Repository:** https://github.com/talha-yousuf/md_dedup
