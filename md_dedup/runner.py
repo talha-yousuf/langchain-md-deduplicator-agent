@@ -1,23 +1,26 @@
 # runner.py
 
-from langchain.llms import OpenAI
-from loader import load_markdown, save_markdown
-from passes import (
+from .loader import load_markdown, save_markdown
+from .passes import (
     dedupe_within_section,
     semantic_dedupe_lines,
     find_similar_section_groups,
     merge_sections_with_children,
     global_consistency,
 )
-from utils import print_info, print_error
-import config
+from .utils import print_info, print_error
+from . import config
 
-# Initialize cloud AI
-llm = OpenAI(
-    model_name=config.MODEL_NAME,
-    temperature=config.TEMPERATURE,
-    openai_api_key=config.OPENAI_API_KEY,
-)
+# Initialize LLM only if enabled
+llm = None
+if config.USE_LLM:
+    from langchain_openai import OpenAI
+
+    llm = OpenAI(
+        model_name=config.MODEL_NAME,
+        temperature=config.TEMPERATURE,
+        openai_api_key=config.OPENAI_API_KEY,
+    )
 
 
 def llm_merge_sections(sections_to_merge, llm):
@@ -27,6 +30,10 @@ def llm_merge_sections(sections_to_merge, llm):
     """
     if len(sections_to_merge) == 1:
         return sections_to_merge[0]
+
+    if not llm:
+        print_info("LLM disabled - using basic merge")
+        return merge_sections_with_children(sections_to_merge)
 
     # Combine all section contents (only the section content, not children)
     combined_text = "\n\n---\n\n".join([sec.content for sec in sections_to_merge])
@@ -54,7 +61,7 @@ Sections to merge:
 Return ONLY the merged markdown section, nothing else."""
 
     try:
-        merged_content = llm(prompt)
+        merged_content = llm.invoke(prompt)
         # Update first section with merged content
         sections_to_merge[0].update_content(merged_content.strip())
 
@@ -76,8 +83,18 @@ Return ONLY the merged markdown section, nothing else."""
 def llm_semantic_dedupe(section, llm):
     """
     Use LLM to remove semantically duplicate content within a section.
+    Falls back to basic fuzzy dedup if LLM is not available.
     """
     if len(section.content.strip()) < 50:  # Skip very short sections
+        return section
+
+    if not llm:
+        # Use basic fuzzy deduplication instead
+        lines = section.content.split("\n")
+        unique_lines = semantic_dedupe_lines(
+            lines, None, threshold=config.SEMANTIC_DEDUP_THRESHOLD
+        )
+        section.update_content("\n".join(unique_lines))
         return section
 
     prompt = f"""You are cleaning up a markdown section by removing semantically duplicate information.
@@ -95,10 +112,15 @@ Section to clean:
 Return ONLY the cleaned section, nothing else."""
 
     try:
-        cleaned_content = llm(prompt)
+        cleaned_content = llm.invoke(prompt)
         section.update_content(cleaned_content.strip())
     except Exception as e:
-        print_error(f"LLM semantic dedup failed: {e}. Skipping.")
+        print_error(f"LLM semantic dedup failed: {e}. Using basic fuzzy dedup.")
+        lines = section.content.split("\n")
+        unique_lines = semantic_dedupe_lines(
+            lines, None, threshold=config.SEMANTIC_DEDUP_THRESHOLD
+        )
+        section.update_content("\n".join(unique_lines))
 
     return section
 
@@ -116,8 +138,13 @@ def run_pipeline(input_file, output_file):
     for sec in sections:
         sec.update_content(dedupe_within_section(sec.content))
 
-    # PASS 2: Semantic deduplication within sections using LLM
-    print_info("Pass 2: Removing semantic duplicates within sections")
+    # PASS 2: Semantic deduplication within sections
+    if config.USE_LLM:
+        print_info("Pass 2: Removing semantic duplicates within sections (LLM)")
+    else:
+        print_info(
+            "Pass 2: Removing semantic duplicates within sections (Fuzzy matching)"
+        )
     sections = [llm_semantic_dedupe(sec, llm) for sec in sections]
 
     # PASS 3: Find and merge similar sections
@@ -130,7 +157,7 @@ def run_pipeline(input_file, output_file):
     groups_to_merge = [g for g in similar_groups if len(g) > 1]
     print_info(f"Found {len(groups_to_merge)} groups of similar sections to merge")
 
-    # Merge similar sections using LLM
+    # Merge similar sections
     merged_sections = []
     processed_indices = set()
 
