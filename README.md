@@ -100,12 +100,6 @@ flowchart TD
     J --> L[Pass 4: Global Consistency]
     K --> L
     L --> M[Save Cleaned Markdown]
-
-    style A fill:#f9f,stroke:#000,stroke-width:2px
-    style B fill:#bbf,stroke:#000,stroke-width:1px
-    style E fill:#99f,stroke:#000,stroke-width:2px
-    style J fill:#99f,stroke:#000,stroke-width:2px
-    style M fill:#f9f,stroke:#000,stroke-width:2px
 ```
 
 1. **Pass 1: Exact Deduplication**
