@@ -4,9 +4,9 @@
 ![License](https://img.shields.io/badge/license-CC_BY--NC_4.0-lightgrey)
 ![Status](https://img.shields.io/badge/status-MVP-yellow)
 
-> **Status**: Prototype / MVP
-
 Markdown Deduplication and Cleanup Tool using langChain and OpenAI. Designed to process large Markdown files, remove redundancy, merge overlapping sections, and maintain coherent structure. Ideal for developers, technical writers, and anyone managing documentation.
+
+---
 
 ## Table of Contents
 
