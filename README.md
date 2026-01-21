@@ -95,6 +95,28 @@ md-dedup --input <input_file.md> --output <output_file.md>
 
 **Result:** A Markdown file that is **concise, non-redundant, and readable**, ready for documentation, portfolio, or publication.
 
+## Architecture / Pipeline
+
+```mermaid
+flowchart TD
+    A[Input Markdown File] --> B[Loader Module (loader.py)]
+    B --> C[Deduplication Pass (passes.py)]
+    C --> D[Merge Pass via LangChain / AI API (runner.py)]
+    D --> E[Global Consistency Pass (passes.py)]
+    E --> F[Save Cleaned Markdown File (loader.py)]
+
+    subgraph CloudAI[Cloud AI]
+        D
+    end
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#bbf,stroke:#333,stroke-width:1px
+    style C fill:#bbf,stroke:#333,stroke-width:1px
+    style D fill:#fbf,stroke:#333,stroke-width:2px
+    style E fill:#bbf,stroke:#333,stroke-width:1px
+    style F fill:#f9f,stroke:#333,stroke-width:2px
+```
+
 ## Design Decisions
 
 - **Cloud LLM via OpenAI** – Simplifies setup; free-tier sufficient for prototyping
@@ -118,3 +140,7 @@ This project is licensed under **CC BY-NC 4.0 (Creative Commons Attribution-NonC
 - Commercial use, redistribution, or sale requires explicit permission from the author
 
 For full license text, see [LICENSE](./LICENSE)
+
+```
+
+```
