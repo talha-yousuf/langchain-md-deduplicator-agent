@@ -99,13 +99,13 @@ md-dedup --input <input_file.md> --output <output_file.md>
 
 ```mermaid
 flowchart TD
-    A[Input Markdown File] --> B[Loader Module (loader.py)]
-    B --> C[Deduplication Pass (passes.py)]
-    C --> D[Merge Pass via LangChain / AI API (runner.py)]
-    D --> E[Global Consistency Pass (passes.py)]
-    E --> F[Save Cleaned Markdown File (loader.py)]
+    A[Input Markdown File] --> B[Loader]
+    B --> C[Deduplication Pass]
+    C --> D[Merge Pass via LangChain / AI API]
+    D --> E[Global Consistency Pass]
+    E --> F[Save Cleaned Markdown File]
 
-    subgraph CloudAI[Cloud AI]
+    subgraph LLM[LLM]
         D
     end
 
